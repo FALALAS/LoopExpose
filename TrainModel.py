@@ -16,10 +16,8 @@ from batch_transformers import BatchRandomResolution, BatchToTensor, BatchRGBToY
     TensorRandom, TensorRGBToYCbCr
 from loss.PerceptualLoss import PerceptualLoss
 from loss.SSIMLoss import SSIMLoss
-from loss.ColorLoss import ColorLoss
 from loss.LumiLoss import BrightnessOrderLoss
-from loss.tvLoss import TVLoss
-from loss.FrequencyLoss import FFT_Loss
+
 
 from metrics import compute_psnr_ssim, psnr_ssim_for_folder, psnr_ssim
 from sec.co_lut_arch import CoNet
@@ -86,10 +84,8 @@ class Trainer(object):
         # loss function
         self.perceptual_loss_fn = PerceptualLoss()
         self.ssim_loss_fn = SSIMLoss()
-        self.color_loss_fn = ColorLoss()
         self.lumi_loss_fn = BrightnessOrderLoss()
-        self.tv_loss_fn = TVLoss()
-        self.fft_loss_fn = FFT_Loss()
+        
         # self.lumi_loss_fn = BrightnessOrderLoss(num_channels=8)
         # self.lumi_struc_loss_fn = BrightnessStructurePreservationLoss(num_channels=8)
         # optimizer
@@ -112,9 +108,6 @@ class Trainer(object):
             self.perceptual_loss_fn = self.perceptual_loss_fn.cuda()
             self.ssim_loss_fn = self.ssim_loss_fn.cuda()
             self.lumi_loss_fn = self.lumi_loss_fn.cuda()
-            self.color_loss_fn = self.color_loss_fn.cuda()
-            self.tv_loss_fn = self.tv_loss_fn.cuda()
-            self.fft_loss_fn = self.fft_loss_fn.cuda()
 
         # some states
         self.epochs_warmup = config.epochs_warmup - 1
@@ -229,8 +222,8 @@ class Trainer(object):
             i_rgb = torch.squeeze(i_rgb, dim=0)
             if epoch > self.epochs_warmup:
                 i_hr = self.transfer_intermediate(i_rgb, epoch=epoch, state='train')
-                alpha = self.get_alpha(epoch)
-                O_hr_RGB = alpha * self.mertens_fusion(i_hr) + (1 - alpha) * self.mertens_fusion(i_rgb)
+                i_sec = torch.cat([i_hr, i_rgb], dim=0)
+                O_hr_RGB = self.mertens_fusion(i_sec)
                 self._save_image(O_hr_RGB, self.weight_map_path, f"{epoch}_{step}_mixed")
             else:
                 O_hr_RGB = self.mertens_fusion(i_rgb)
@@ -242,12 +235,9 @@ class Trainer(object):
             O_hr_RGB = O_hr_RGB.expand_as(O_sec)
             l_pixel = nn.L1Loss()(O_sec, O_hr_RGB)
             l_perceptual = self.perceptual_loss_fn(O_sec, O_hr_RGB)
-            # l_ssim = self.ssim_loss_fn(O_sec, O_hr_RGB)
+            l_ssim = self.ssim_loss_fn(O_sec, O_hr_RGB)
             l_lumi = self.lumi_loss_fn(lumi_feature)
-            l_color = self.color_loss_fn(lut_feature, O_sec)
-            # l_fft = self.fft_loss_fn(O_sec, O_hr_RGB)
-            # l_tv = self.tv_loss_fn(O_sec)
-            secLoss = l_pixel + 0.1*l_perceptual + l_lumi + l_color
+            secLoss = l_pixel + 0.1*l_perceptual + l_lumi +0.5*l_ssim
             secLoss.backward()
             self.optimizer_sec.step()
             format_str = 'SEC: (E:%d, S:%d) [Loss = %.4f]'
@@ -271,7 +261,7 @@ class Trainer(object):
                 f.write(out_str_mef + "\n")
             print(out_str_mef)
             print(out_str_sec)
-            if avg_psnr_sec > self.max_results['psnr_sec'] and avg_ssim_sec > self.max_results['ssim_sec']:
+            if avg_psnr_sec > self.max_results['psnr_sec'] or avg_ssim_sec > self.max_results['ssim_sec']:
                 self.max_results['psnr_sec'] = avg_psnr_sec
                 self.max_results['ssim_sec'] = avg_ssim_sec
                 model_name = 'sec-best-epoch{:0>4d}.pt'.format(epoch)
@@ -283,7 +273,7 @@ class Trainer(object):
                     'test_psnr': avg_psnr_sec,
                     'test_ssim': avg_ssim_sec
                 }, model_name)
-            if avg_psnr_mef > self.max_results['psnr_mef'] and avg_ssim_mef > self.max_results['ssim_mef']:
+            if avg_psnr_mef > self.max_results['psnr_mef'] or avg_ssim_mef > self.max_results['ssim_mef']:
                 self.max_results['psnr_mef'] = avg_psnr_mef
                 self.max_results['ssim_mef'] = avg_ssim_mef
                 model_name = 'mef-bestsec-epoch{:0>4d}.pt'.format(epoch)
@@ -315,7 +305,11 @@ class Trainer(object):
             i_hr, psnr_values, ssim_values = self.transfer_intermediate(i_rgb, i_gt, case, cases, epoch, state='eval')
             psnr_sec.extend(psnr_values)
             ssim_sec.extend(ssim_values)
-            O_hr_RGB = 0.5 * self.mertens_fusion(i_hr).cpu() + 0.5 * self.mertens_fusion(i_rgb).cpu()
+            '''
+            i_sec = torch.cat([i_hr, i_rgb], dim=0)
+            O_hr_RGB = self.mertens_fusion(i_sec).cpu()
+            '''
+            O_hr_RGB = 0.5*self.mertens_fusion(i_hr).cpu() + 0.5*self.mertens_fusion(i_rgb).cpu()
             if self.eval_save:
                 epoch_save_path = os.path.join(self.fused_img_path, f"epoch{epoch}")
                 if not os.path.exists(epoch_save_path):

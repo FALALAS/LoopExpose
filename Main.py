@@ -19,7 +19,7 @@ def parse_config():
     parser.add_argument("--trainset", type=str, default=r"/data/liao/seqMSEC/INPUT_IMAGES/")
     parser.add_argument("--testset", type=str, default=r"/data/liao/seqMSEC/INPUT_IMAGES/")
     parser.add_argument("--testGTset", type=str, default=r"/data/liao/seqMSEC/GT_IMAGES/expert_c_testing_set/")
-    parser.add_argument("--device", type=int, default=2)
+    parser.add_argument("--device", type=int, default=1)
     parser.add_argument('--ckpt', default=None, type=str, help='name of the checkpoint to load')
     parser.add_argument('--experiment_path', default='./experiments/', type=str,
                         metavar='PATH', help='path to save experiment data')

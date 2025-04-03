@@ -418,13 +418,13 @@ class CoNet(nn.Module):
         self.map = nn.Conv2d(8, 3, kernel_size=3, stride=1, padding=1)
 
     def forward(self, img):
-        img_input, _ = self.sampler(img=img)
-        img_unids = img_input
+        img_unids = F.interpolate(img, size=(self.input_resolution, ) * 2, mode='bilinear', align_corners=False)
         out_feature, luminance_features = self.autoencoder(img_unids)
         # out_feature, luminance_features = self.luminance_net(img_unids)
         # fused_features = torch.cat([out_feature, luminance_features], dim=1)
         # fused_features = out_feature
         fused_features = out_feature
+        img_input, _ = self.sampler(img=img)
         output_hr = self.lut(img_input, img)
         output = self.map(self.fusion(output_hr, fused_features))
         return output, luminance_features, output_hr
