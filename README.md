@@ -13,4 +13,12 @@ This repository is the official implementation  of "LoopExpose: An Unsupervised 
 
 *: Corresponding Author. Email: 
 
-Usage is coming soon
+Datasets
+
+Usage
+
+train
+
+python Main.py
+
+test
