@@ -224,7 +224,7 @@ class Trainer(object):
                 i_hr = self.transfer_intermediate(i_rgb, epoch=epoch, state='train')
                 i_sec = torch.cat([i_hr, i_rgb], dim=0)
                 O_hr_RGB = self.mertens_fusion(i_sec)
-                self._save_image(O_hr_RGB, self.weight_map_path, f"{epoch}_{step}_mixed")
+                # self._save_image(O_hr_RGB, self.weight_map_path, f"{epoch}_{step}_mixed")
             else:
                 O_hr_RGB = self.mertens_fusion(i_rgb)
             # SECModel

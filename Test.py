@@ -183,7 +183,7 @@ if __name__ == '__main__':
     # Input directory
     parser.add_argument(
         '--input_dir',
-        default=r'D:\ECprojects\ME\MSEC\testing\INPUT_IMAGES',
+        default=r'D:\ECprojects\ME\MSEC\lyq\lr',
         help='Root folder containing images (default: D:\\ECprojects\\ME\\MSEC\\testing\\INPUT_IMAGES)')
 
     # Output directory

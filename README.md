@@ -11,14 +11,49 @@ This repository is the official implementation  of "LoopExpose: An Unsupervised 
 
 <sup>3</sup>School of Computer Science and Technology, Xidian University
 
-*: Corresponding Author. Email: 
+*: Corresponding Author.  
 
-Datasets
+## Datasets
 
-Usage
+- MSEC https://github.com/mahmoudnafifi/Exposure_Correction
 
-train
+- UEC https://github.com/BeyondHeaven/uec_code
 
+  Our datasets will be available soon.
+
+## Environment
+
+OS:  Ubuntu 20.04.6
+
+python == 3.9.19
+
+torch == 2.4.1
+
+opencv == 4.10.0
+
+This model is trained on an RTX 4090 GPU, taking about a day and occupies approximately 24GB of memory.
+
+## Usage
+
+### train
+
+Please refer to Main.py for options information. 
+
+```python
 python Main.py
+```
 
-test
+### test
+
+Checkpoints are released at `ckpts`. 
+
+```python
+python Test.py
+```
+
+
+If you have any questions about the code, please email me directly : liaoxdu@foxmail.com or ali_0607@stu.xidian.edu.cn .
+
+## Acknowledgment and Future works
+
+This implementation is based on [CoTF](https://github.com/HUST-IAL/CoTF)、[LACT](https://github.com/whdgusdl48/Luminance-aware-Color-Transform-ICCV-2023-)、[MEFNet](https://github.com/makedede/MEFNet) and [OpenCV](https://github.com/opencv/opencv). 
