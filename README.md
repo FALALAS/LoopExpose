@@ -56,4 +56,4 @@ If you have any questions about the code, please email me directly : liaoxdu@fox
 
 ## Acknowledgment and Future works
 
-This implementation is based on [CoTF](https://github.com/HUST-IAL/CoTF)、[LACT](https://github.com/whdgusdl48/Luminance-aware-Color-Transform-ICCV-2023-)、[MEFNet](https://github.com/makedede/MEFNet) and [OpenCV](https://github.com/opencv/opencv). 
+This implementation is based on [CoTF](https://github.com/HUST-IAL/CoTF)、[LACT](https://github.com/whdgusdl48/Luminance-aware-Color-Transform-ICCV-2023-)、[MEFNet](https://github.com/makedede/MEFNet) and [OpenCV](https://github.com/opencv/opencv). In the future, we will incorporate more exposure correction models and exposure fusion models into our framework. Everyone is also welcome to contribute to this project.
